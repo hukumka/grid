@@ -6,6 +6,7 @@ use crate::{
 };
 use std::ops;
 use std::ops::Range;
+use crate::slice::FromGridSlice;
 
 const CHUNK_SIDE_LG2: i32 = 6;
 const CHUNK_SIDE: i32 = 1 << CHUNK_SIDE_LG2;
@@ -83,3 +84,22 @@ impl<T: Default> ops::IndexMut<(i32, i32)> for InfiniteGrid<T> {
 }
 
 impl<T: Default> ImplIndexForRef<(i32, i32)> for InfiniteGrid<T> {}
+
+impl<I: Clone + Default> FromGridSlice<i32, I> for InfiniteGrid<I> {
+    fn from_slice<T>(slice: &GridSlice<T, i32>) -> Self
+    where
+        T: ops::Index<(i32, i32), Output=I>,
+    {
+        let xr = slice.x_range();
+        let yr = slice.y_range();
+        let w = xr.end - xr.start;
+        let h = yr.start - yr.end;
+        let mut res = Self::new();
+        for y in 0..h {
+            for x in 0..w {
+                res[(x, y)] = slice[(x + xr.start, y + yr.start)].clone()
+            }
+        }
+        res
+    }
+}

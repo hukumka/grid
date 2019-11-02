@@ -4,12 +4,12 @@ use std::iter::Step;
 use std::ops;
 use std::ops::Range;
 
-pub trait FromGridSlice<K: Step + Copy> {
+pub trait FromGridSlice<K: Step + Copy, I> {
     fn from_slice<T>(slice: &GridSlice<T, K>) -> Self
     where
-        T: ops::Index<(K, K)>,
-        K: Step + Copy,
-        <T as ops::Index<(K, K)>>::Output: Clone;
+        T: ops::Index<(K, K), Output=I>,
+        K: Step + Copy
+    ;
 }
 
 #[derive(Clone)]
@@ -87,20 +87,29 @@ where
     T: ops::Index<(K, K)>,
     K: Step + Copy,
 {
+    pub fn x_range(&self) -> Range<K> {
+        self.x.clone()
+    }
+
+    pub fn y_range(&self) -> Range<K> {
+        self.y.clone()
+    }
+
+    /// Create iterator over slice elements
     pub fn iter(&self) -> impl Iterator<Item = &<T as ops::Index<(K, K)>>::Output> {
-        self.x
+        self.y
             .clone()
-            .flat_map(move |x| self.y.clone().map(move |y| (x, y)))
+            .flat_map(move |y| self.x.clone().map(move |x| (x, y)))
             .map(move |key| self.grid.index(key))
     }
 
+    /// Create iterator over slice elements and corresponding indices
     pub fn iter_indices(
         &self,
     ) -> impl Iterator<Item = ((K, K), &<T as ops::Index<(K, K)>>::Output)> {
-        let y = self.y.clone();
-        self.x
-            .clone()
-            .flat_map(move |x| y.clone().map(move |y| (x, y)))
+        let x = self.y.clone();
+        self.y.clone()
+            .flat_map(move |y| x.clone().map(move |x| (x, y)))
             .map(move |key| (key, self.grid.index(key)))
     }
 }
@@ -111,7 +120,8 @@ where
     K: Step + Copy,
     <T as ops::Index<(K, K)>>::Output: Clone,
 {
-    pub fn clone_into<X: FromGridSlice<K>>(&self) -> X {
+    /// Create new grid owning copies of slice elements
+    pub fn clone_into<X: FromGridSlice<K, <T as ops::Index<(K, K)>>::Output>>(&self) -> X {
         X::from_slice(&self)
     }
 }
@@ -122,6 +132,7 @@ where
     K: Step + PartialEq + Copy,
     <T as ops::Index<(K, K)>>::Output: Clone,
 {
+    /// Copy elements from other slice of same size
     pub fn clone_from<T2>(&mut self, source: &GridSlice<T2, K>)
     where
         T2: ops::Index<(K, K), Output = <T as ops::Index<(K, K)>>::Output>,
