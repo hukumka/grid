@@ -107,7 +107,7 @@ where
     pub fn iter_indices(
         &self,
     ) -> impl Iterator<Item = ((K, K), &<T as ops::Index<(K, K)>>::Output)> {
-        let x = self.y.clone();
+        let x = self.x.clone();
         self.y.clone()
             .flat_map(move |y| x.clone().map(move |x| (x, y)))
             .map(move |key| (key, self.grid.index(key)))
