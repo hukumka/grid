@@ -43,7 +43,7 @@ impl<T: Default> Grid<T> {
 
 impl<T: Clone> Grid<T>{
     /// Create new instance of grid filled with default elements
-    pub fn new_default((width, height): (usize, usize), fill_with: T) -> Self {
+    pub fn new((width, height): (usize, usize), fill_with: T) -> Self {
         let mut data = Vec::with_capacity(width * height);
         for _ in 0..(width * height) {
             data.push(fill_with.clone());
