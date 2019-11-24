@@ -32,10 +32,21 @@ fn flat_offset((x, y): (usize, usize), (w, h): (usize, usize)) -> usize {
 
 impl<T: Default> Grid<T> {
     /// Create new instance of grid filled with default elements
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn new_default((width, height): (usize, usize)) -> Self {
         let mut data = Vec::with_capacity(width * height);
         for _ in 0..(width * height) {
             data.push(T::default());
+        }
+        Grid { data, dims: (width, height) }
+    }
+}
+
+impl<T: Clone> Grid<T>{
+    /// Create new instance of grid filled with default elements
+    pub fn new_default((width, height): (usize, usize), fill_with: T) -> Self {
+        let mut data = Vec::with_capacity(width * height);
+        for _ in 0..(width * height) {
+            data.push(fill_with.clone());
         }
         Grid { data, dims: (width, height) }
     }
