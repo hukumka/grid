@@ -25,6 +25,25 @@ impl<T, K> GridSlice<T, K> {
     }
 }
 
+impl<T, K> fmt::Display for GridSlice<T, K>
+where
+    T: ops::Index<(K, K), Output=char>,
+    K: Step + Copy,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for i in self.y.clone() {
+            let mut iter = self.x.clone();
+            let zero = iter.next().unwrap();
+            write!(f, "{}", self.grid.index((zero, i)))?;
+            for j in iter {
+                write!(f, " {}", self.grid.index((j, i)))?;
+            }
+            writeln!(f)?;
+        }
+        Ok(())
+    }
+}
+
 impl<T, K> fmt::Debug for GridSlice<T, K>
 where
     T: ops::Index<(K, K)>,
